@@ -6,18 +6,27 @@ import java.util.Scanner;
 
 import javax.imageio.ImageIO;
 public class ColorGenerator {
-	static int[] colors = new int[16777217];
+	static int[] red = new int[16777216];
+	static int[] green = new int[16777216];
+	static int[] blue = new int[16777216];
+	static int r;
+	static int g;
+	static int b;
 	static int xAmount;
 	static int yAmount;
 	static Random generator = new Random();
 	static int x;
 	static int y;
 	static int z;
-	static int blocks = 2;
-	static int method = 2;
+	static int blocks;
+	static int method;
+	static int[] color = new int[16777216];
 	public static BufferedImage bufferImage;
 	static int blackPixelCounter = 0;
 	static String fileName;
+	static Scanner reader = new Scanner(System.in);
+	static String channelOrder;
+	static int[] digits = new int[500];
 	public static void main(String[] args)
 	{
 		recieveInput();
@@ -36,7 +45,6 @@ public class ColorGenerator {
 	}
 	public static void recieveInput()
 	{
-		Scanner reader = new Scanner(System.in);
 		System.out.println("Enter the width");
 		xAmount = reader.nextInt();
 		System.out.println("Enter the height");
@@ -45,6 +53,16 @@ public class ColorGenerator {
 		System.out.println("<1> Fill by pattern");
 		System.out.println("<2> Fill randomly");
 		method = reader.nextInt();
+		if (method == 1)
+		{
+			System.out.println("What order would you like the color channels to be in?");
+			channelOrder = reader.next();
+		}
+		else
+		{
+			System.out.println("How large on each side do you want the random blocks to be?");
+			blocks = reader.nextInt();
+		}
 		System.out.println("What would you like to name the file?");
 		fileName = reader.next();
 		reader.close();
@@ -58,79 +76,45 @@ public class ColorGenerator {
 	{
 		for (int i = 0; i < 16777216; i++)
 		{
-			colors[i] = i;
-		}
-		colors[16777216] = 0;
-		for (int y = 0; y < yAmount; y++)
-		{
-			for (int x = 0; x < xAmount; x++)
+			red[i] = i%256;
+			green[i] = i%256;
+			blue[i] = i%256;
+			if (channelOrder == "RGB");
 			{
-				int color = colors[x+y*xAmount];
-				bufferImage.setRGB(x, y, color);
+				r = red[i/65536];
+				g = green[i/256];
+				b = blue[i];
+				bufferImage.setRGB(i%xAmount, (i/yAmount)%yAmount, (0xFF << 24) | (r << 16) | (g << 8) | b);
+			}
+			if (channelOrder == "GBR")
+			{
+				r = red[i];
+				g = green[i/65536];
+				b = blue[i/256];
+				bufferImage.setRGB(i%xAmount, (i%4096)/4095, (0xFF << 24) | ((i%256)/65536 << 16) | ((i%256)/256 << 8) | i%256);
 			}
 		}
 	}
 	public static void fillRandomPixels()
 	{
 		System.out.println("Filling Image");
-		switch(blocks)
+		z = -16777216;
+		while (z < -1)
 		{
-		case 1:
-			while (z < 16777215/2)
+			x = generator.nextInt(xAmount/blocks);
+			y = generator.nextInt(yAmount/blocks);
+			if (bufferImage.getRGB(blocks*x, blocks*y) == 0)
 			{
-				x = generator.nextInt(xAmount);
-				y = generator.nextInt(yAmount);
-				if (bufferImage.getRGB(x, y) == -16777216)
+				for (int j = 0; j < blocks; j++)
 				{
-					bufferImage.setRGB(x, y, z);
-					z++;
+					for (int i = 0; i < blocks; i++)
+					{
+						bufferImage.setRGB(blocks*x+i, blocks*y+j, z+i+j*blocks);
+					}
 				}
+				z = z + blocks * blocks;
+				System.out.println(z);
 			}
-			break;
-		case 2:
-			z = -16777216;
-			while (z < -1)
-			{
-				x = generator.nextInt(xAmount/2);
-				y = generator.nextInt(yAmount/2);
-				if (bufferImage.getRGB(2*x, 2*y) == 0)
-				{
-					bufferImage.setRGB(2*x, 2*y, z);
-					bufferImage.setRGB(2*x+1, 2*y, z+1);
-					bufferImage.setRGB(2*x, 2*y+1, z+2);
-					bufferImage.setRGB(2*x+1, 2*y+1, z+3);
-					z = z + 4;
-				}
-			}
-		break;
-		case 4:
-			while (z < 16777215)
-			{
-				x = generator.nextInt(xAmount/4);
-				y = generator.nextInt(yAmount/4);
-				if (bufferImage.getRGB(4*x, 4*y) == -16777216)
-				{
-					bufferImage.setRGB(4*x, 4*y, colors[z]);
-					bufferImage.setRGB(4*x+1, 4*y, colors[z+1]);
-					bufferImage.setRGB(4*x+2, 4*y, colors[z+2]);
-					bufferImage.setRGB(4*x+3, 4*y, colors[z+3]);
-					bufferImage.setRGB(4*x, 4*y+1, colors[z+4]);
-					bufferImage.setRGB(4*x+1, 4*y+1, colors[z+5]);
-					bufferImage.setRGB(4*x+2, 4*y+1, colors[z+6]);
-					bufferImage.setRGB(4*x+3, 4*y+1, colors[z+7]);
-					bufferImage.setRGB(4*x, 4*y+2, colors[z+8]);
-					bufferImage.setRGB(4*x+1, 4*y+2, colors[z+9]);
-					bufferImage.setRGB(4*x+2, 4*y+2, colors[z+10]);
-					bufferImage.setRGB(4*x+3, 4*y+2, colors[z+11]);
-					bufferImage.setRGB(4*x, 4*y+3, colors[z+12]);
-					bufferImage.setRGB(4*x+1, 4*y+3, colors[z+13]);
-					bufferImage.setRGB(4*x+2, 4*y+3, colors[z+14]);
-					bufferImage.setRGB(4*x+3, 4*y+3, colors[z+15]);
-					z = z + 16;
-					System.out.println(z);
-				}
-			}
-		break;
 		}
 	}
 	public static void countBlackPixels()
