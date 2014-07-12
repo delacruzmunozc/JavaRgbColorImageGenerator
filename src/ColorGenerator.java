@@ -17,11 +17,10 @@ public class ColorGenerator {
 	static int method = 2;
 	public static BufferedImage bufferImage;
 	static int blackPixelCounter = 0;
-	static int zeroPixelCounter = 0;
 	static String fileName;
 	public static void main(String[] args)
 	{
-		recieveAspectRatio();
+		recieveInput();
 		createImage();
 		switch (method)
 		{
@@ -35,7 +34,7 @@ public class ColorGenerator {
 		}
 		saveImage();
 	}
-	public static void recieveAspectRatio()
+	public static void recieveInput()
 	{
 		Scanner reader = new Scanner(System.in);
 		System.out.println("Enter the width");
@@ -74,7 +73,6 @@ public class ColorGenerator {
 	public static void fillRandomPixels()
 	{
 		System.out.println("Filling Image");
-		z = -16777216;
 		switch(blocks)
 		{
 		case 1:
@@ -90,24 +88,18 @@ public class ColorGenerator {
 			}
 			break;
 		case 2:
+			z = -16777216;
 			while (z < -1)
 			{
 				x = generator.nextInt(xAmount/2);
 				y = generator.nextInt(yAmount/2);
-				if (bufferImage.getRGB(x, y) == 0)
+				if (bufferImage.getRGB(2*x, 2*y) == 0)
 				{
 					bufferImage.setRGB(2*x, 2*y, z);
 					bufferImage.setRGB(2*x+1, 2*y, z+1);
 					bufferImage.setRGB(2*x, 2*y+1, z+2);
 					bufferImage.setRGB(2*x+1, 2*y+1, z+3);
-					if ((bufferImage.getRGB(2*x, 2*y) == 0
-						|| bufferImage.getRGB(2*x+1, 2*y) == 0
-						|| bufferImage.getRGB(2*x, 2*y+1) == 0
-						|| bufferImage.getRGB(2*x+1, 2*y+1) == 0))
-					{
-						System.out.println(z);
-					}
-					z++;
+					z = z + 4;
 				}
 			}
 		break;
@@ -116,7 +108,7 @@ public class ColorGenerator {
 			{
 				x = generator.nextInt(xAmount/4);
 				y = generator.nextInt(yAmount/4);
-				if (bufferImage.getRGB(x, y) == -16777216)
+				if (bufferImage.getRGB(4*x, 4*y) == -16777216)
 				{
 					bufferImage.setRGB(4*x, 4*y, colors[z]);
 					bufferImage.setRGB(4*x+1, 4*y, colors[z+1]);
