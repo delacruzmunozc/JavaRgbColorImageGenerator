@@ -16,6 +16,9 @@ public class ColorGenerator {
 	static int blocks = 2;
 	static int method = 2;
 	public static BufferedImage bufferImage;
+	static int blackPixelCounter = 0;
+	static int zeroPixelCounter = 0;
+	static String fileName;
 	public static void main(String[] args)
 	{
 		recieveAspectRatio();
@@ -25,8 +28,11 @@ public class ColorGenerator {
 		case 1:
 			fillPixels();
 			break;
+		case 2:
+			fillRandomPixels();
+			countBlackPixels();
+			break;
 		}
-		fillRandomPixels();
 		saveImage();
 	}
 	public static void recieveAspectRatio()
@@ -40,11 +46,13 @@ public class ColorGenerator {
 		System.out.println("<1> Fill by pattern");
 		System.out.println("<2> Fill randomly");
 		method = reader.nextInt();
+		System.out.println("What would you like to name the file?");
+		fileName = reader.next();
 		reader.close();
 	}
 	public static void createImage()
 	{
-		bufferImage = new BufferedImage(xAmount, yAmount, BufferedImage.TYPE_INT_RGB);
+		bufferImage = new BufferedImage(xAmount, yAmount, BufferedImage.TYPE_INT_ARGB);
 		System.out.println("Image Created");
 	}
 	public static void fillPixels()
@@ -66,43 +74,39 @@ public class ColorGenerator {
 	public static void fillRandomPixels()
 	{
 		System.out.println("Filling Image");
-		z = -16777213/2;
+		z = -16777216;
 		switch(blocks)
 		{
 		case 1:
-			while (z < 16777215)
+			while (z < 16777215/2)
 			{
 				x = generator.nextInt(xAmount);
 				y = generator.nextInt(yAmount);
 				if (bufferImage.getRGB(x, y) == -16777216)
 				{
-					bufferImage.setRGB(x, y, colors[z]);
+					bufferImage.setRGB(x, y, z);
 					z++;
-					System.out.println(z);
 				}
 			}
 			break;
 		case 2:
-			while (z < 16777213/2)
+			while (z < -1)
 			{
 				x = generator.nextInt(xAmount/2);
 				y = generator.nextInt(yAmount/2);
-				if (bufferImage.getRGB(x, y) == -16777216)
+				if (bufferImage.getRGB(x, y) == 0)
 				{
-					bufferImage.setRGB(2*x, 2*y, z/2);
-					bufferImage.setRGB(2*x+1, 2*y, z/2+1);
-					bufferImage.setRGB(2*x, 2*y+1, z/2+2);
-					bufferImage.setRGB(2*x+1, 2*y+1, z/2+3);
-					//System.out.println(z);
-					//if ((bufferImage.getRGB(2*x, 2*y) == -16777216
-					//	|| bufferImage.getRGB(2*x+1, 2*y) == -16777216
-					//	|| bufferImage.getRGB(2*x, 2*y+1) == -16777216
-					//	|| bufferImage.getRGB(2*x+1, 2*y+1) == -16777216)
-					//	&& z != -7)
-					//{
-					//	System.out.println("For some reason, the pixels didn't write.");
-					//	System.exit(1);
-					//}
+					bufferImage.setRGB(2*x, 2*y, z);
+					bufferImage.setRGB(2*x+1, 2*y, z+1);
+					bufferImage.setRGB(2*x, 2*y+1, z+2);
+					bufferImage.setRGB(2*x+1, 2*y+1, z+3);
+					if ((bufferImage.getRGB(2*x, 2*y) == 0
+						|| bufferImage.getRGB(2*x+1, 2*y) == 0
+						|| bufferImage.getRGB(2*x, 2*y+1) == 0
+						|| bufferImage.getRGB(2*x+1, 2*y+1) == 0))
+					{
+						System.out.println(z);
+					}
 					z++;
 				}
 			}
@@ -137,12 +141,27 @@ public class ColorGenerator {
 		break;
 		}
 	}
+	public static void countBlackPixels()
+	{
+		blackPixelCounter = 0;
+		for (int y = 0; y < yAmount; y++)
+		{
+			for (int x = 0; x < xAmount; x++)
+			{
+				if (bufferImage.getRGB(x, y) == 0)
+				{
+					blackPixelCounter++;
+				}
+			}
+		}
+		System.out.println(blackPixelCounter);
+	}
 	public static void saveImage()
 	{
 		try
 		{
 			System.out.println("Saving");
-			File outputfile = new File("RandomRGB4x4block.png");
+			File outputfile = new File(fileName + ".png");
 			ImageIO.write(bufferImage, "png", outputfile);
 			System.out.println("Saved");
 		}
