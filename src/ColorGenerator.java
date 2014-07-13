@@ -6,27 +6,15 @@ import java.util.Scanner;
 
 import javax.imageio.ImageIO;
 public class ColorGenerator {
-	static int[] red = new int[16777216];
-	static int[] green = new int[16777216];
-	static int[] blue = new int[16777216];
-	static int r;
-	static int g;
-	static int b;
 	static int xAmount;
 	static int yAmount;
-	static Random generator = new Random();
-	static int x;
-	static int y;
-	static int z;
 	static int blocks;
 	static int method;
-	static int[] color = new int[16777216];
 	public static BufferedImage bufferImage;
 	static int blackPixelCounter = 0;
 	static String fileName;
 	static Scanner reader = new Scanner(System.in);
 	static String channelOrder;
-	static int[] digits = new int[500];
 	public static void main(String[] args)
 	{
 		recieveInput();
@@ -77,20 +65,17 @@ public class ColorGenerator {
 			assembledColors[v] = (255 << 24);
 			for (int j = 2; j >= 0; j--)
 			{
-				red[v%256] = (v >> 16) & 255;
-				green[v%256] = (v >> 8) & 255;
-				blue[v%256] = v & 255;
 				if (channelOrder.charAt(2-j) == 'R')
 				{
-					assembledColors[v] = assembledColors[v] + (red[v%256] << (j*8));
+					assembledColors[v] = assembledColors[v] + (((v >> 16) & 255) << (j*8));
 				}
 				if (channelOrder.charAt(2-j) == 'G')
 				{
-					assembledColors[v] = assembledColors[v] + (green[v%256] << (j*8));
+					assembledColors[v] = assembledColors[v] + (((v >> 8) & 255) << (j*8));
 				}
 				if (channelOrder.charAt(2-j) == 'B')
 				{
-					assembledColors[v] = assembledColors[v] + (blue[v%256] << (j*8));
+					assembledColors[v] = assembledColors[v] + ((v & 255) << (j*8));
 				}
 			}
 		}
@@ -105,11 +90,12 @@ public class ColorGenerator {
 	public static void fillRandomPixels()
 	{
 		System.out.println("Filling Image");
-		z = -16777216;
+		int z = -16777216;
+		Random generator = new Random();
 		while (z < -1)
 		{
-			x = generator.nextInt(xAmount/blocks);
-			y = generator.nextInt(yAmount/blocks);
+			int x = generator.nextInt(xAmount/blocks);
+			int y = generator.nextInt(yAmount/blocks);
 			if (bufferImage.getRGB(blocks*x, blocks*y) == 0)
 			{
 				for (int j = 0; j < blocks; j++)
