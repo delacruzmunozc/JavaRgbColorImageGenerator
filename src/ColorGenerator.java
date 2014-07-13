@@ -3,9 +3,10 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Random;
 import java.util.Scanner;
-
 import javax.imageio.ImageIO;
+
 public class ColorGenerator {
+	
 	static int xAmount;
 	static int yAmount;
 	static int blocks;
@@ -15,6 +16,7 @@ public class ColorGenerator {
 	static String fileName;
 	static Scanner reader = new Scanner(System.in);
 	static String channelOrder;
+	
 	public static void main(String[] args)
 	{
 		recieveInput();
@@ -31,6 +33,7 @@ public class ColorGenerator {
 		}
 		saveImage();
 	}
+	
 	public static void recieveInput()
 	{
 		System.out.println("Enter the width");
@@ -52,11 +55,13 @@ public class ColorGenerator {
 		channelOrder = reader.next();
 		reader.close();
 	}
+	
 	public static void createImage()
 	{
 		bufferImage = new BufferedImage(xAmount, yAmount, BufferedImage.TYPE_INT_ARGB);
 		System.out.println("Image Created");
 	}
+	
 	public static void fillPixels()
 	{
 		int[] assembledColors = new int[16777216];
@@ -87,11 +92,14 @@ public class ColorGenerator {
 			}
 		}
 	}
+	
 	public static void fillRandomPixels()
 	{
 		System.out.println("Filling Image");
 		int z = -16777216;
 		Random generator = new Random();
+		int[] assembledColors = new int[16777216];
+		int count = 0;
 		while (z < -1)
 		{
 			int x = generator.nextInt(xAmount/blocks);
@@ -102,14 +110,31 @@ public class ColorGenerator {
 				{
 					for (int i = 0; i < blocks; i++)
 					{
-						bufferImage.setRGB(blocks*x+i, blocks*y+j, z+i+j*blocks);
+						assembledColors[count+i+j*blocks] = (255 << 24);
+						for (int h = 2; h >= 0; h--)
+						{
+							if (channelOrder.charAt(2-h) == 'R')
+							{
+								assembledColors[count+i+j*blocks] = assembledColors[count+i+j*blocks] + (((count+i+j*blocks >> 16) & 255) << (h*8));
+							}
+							if (channelOrder.charAt(2-h) == 'G')
+							{
+								assembledColors[count+i+j*blocks] = assembledColors[count+i+j*blocks] + (((count+i+j*blocks >> 8) & 255) << (h*8));
+							}
+							if (channelOrder.charAt(2-h) == 'B')
+							{
+								assembledColors[count+i+j*blocks] = assembledColors[count+i+j*blocks] + ((count+i+j*blocks & 255) << (h*8));
+							}
+						}
+						bufferImage.setRGB(blocks*x+i, blocks*y+j, assembledColors[count+i+j*blocks]);
 					}
 				}
 				z = z + blocks * blocks;
-				System.out.println(z);
+				count = count + blocks * blocks;
 			}
 		}
 	}
+	
 	public static void countBlackPixels()
 	{
 		blackPixelCounter = 0;
@@ -125,6 +150,7 @@ public class ColorGenerator {
 		}
 		System.out.println(blackPixelCounter);
 	}
+	
 	public static void saveImage()
 	{
 		try
