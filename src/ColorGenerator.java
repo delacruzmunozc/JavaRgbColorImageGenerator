@@ -53,18 +53,15 @@ public class ColorGenerator {
 		System.out.println("<1> Fill by pattern");
 		System.out.println("<2> Fill randomly");
 		method = reader.nextInt();
-		if (method == 1)
-		{
-			System.out.println("What order would you like the color channels to be in?");
-			channelOrder = reader.next();
-		}
-		else
+		if (method == 2)
 		{
 			System.out.println("How large on each side do you want the random blocks to be?");
 			blocks = reader.nextInt();
 		}
 		System.out.println("What would you like to name the file?");
 		fileName = reader.next();
+		System.out.println("What order would you like the color channels to be in?");
+		channelOrder = reader.next();
 		reader.close();
 	}
 	public static void createImage()
@@ -74,24 +71,34 @@ public class ColorGenerator {
 	}
 	public static void fillPixels()
 	{
-		for (int i = 0; i < 16777216; i++)
+		int[] assembledColors = new int[16777216];
+		for (int v = 0; v < 16777216; v++)
 		{
-			red[i] = i%256;
-			green[i] = i%256;
-			blue[i] = i%256;
-			if (channelOrder == "RGB");
+			assembledColors[v] = (255 << 24);
+			for (int j = 2; j >= 0; j--)
 			{
-				r = red[i/65536];
-				g = green[i/256];
-				b = blue[i];
-				bufferImage.setRGB(i%xAmount, (i/yAmount)%yAmount, (0xFF << 24) | (r << 16) | (g << 8) | b);
+				red[v%256] = (v >> 16) & 255;
+				green[v%256] = (v >> 8) & 255;
+				blue[v%256] = v & 255;
+				if (channelOrder.charAt(2-j) == 'R')
+				{
+					assembledColors[v] = assembledColors[v] + (red[v%256] << (j*8));
+				}
+				if (channelOrder.charAt(2-j) == 'G')
+				{
+					assembledColors[v] = assembledColors[v] + (green[v%256] << (j*8));
+				}
+				if (channelOrder.charAt(2-j) == 'B')
+				{
+					assembledColors[v] = assembledColors[v] + (blue[v%256] << (j*8));
+				}
 			}
-			if (channelOrder == "GBR")
+		}
+		for (int x = 0; x < xAmount; x++)
+		{
+			for (int y = 0; y < yAmount; y++)
 			{
-				r = red[i];
-				g = green[i/65536];
-				b = blue[i/256];
-				bufferImage.setRGB(i%xAmount, (i%4096)/4095, (0xFF << 24) | ((i%256)/65536 << 16) | ((i%256)/256 << 8) | i%256);
+				 bufferImage.setRGB(x, y, assembledColors[x+y*xAmount]);
 			}
 		}
 	}
